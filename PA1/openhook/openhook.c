@@ -13,32 +13,17 @@ MODULE_LICENSE("GPL");
 char filepath[128] = { 0x0, } ;
 void ** sctable ;
 int count = 0 ;
-struct list_head* prev;
-struct list_head* next;
-struct list_head* now;
-
-void list_redo(void){
-	
-	now->prev = prev;
-	now->next = next;
-}
-void save_info(void){
-	now = &THIS_MODULE->list;
-	prev = now->prev;
-	next = now->next;
-}
 
 asmlinkage int (*orig_sys_open)(const char __user * filename, int flags, umode_t mode) ; 
 
 asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_t mode)
 {
 	char fname[256] ;
-	list_redo();
+
 	copy_from_user(fname, filename, 256) ;
 
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
 		count++ ;
-
 		return -1 ;
 	}
 	return orig_sys_open(filename, flags, mode) ;
@@ -62,8 +47,7 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 	ssize_t toread ;
 
 	sprintf(buf, "%s:%d\n", filepath, count) ;
-	save_info();
-	list_del_init(&THIS_MODULE->list);
+
 	toread = strlen(buf) >= *offset + size ? size : strlen(buf) - *offset ;
 
 	if (copy_to_user(ubuf, buf + *offset, toread))
