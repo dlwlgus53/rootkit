@@ -1,0 +1,1 @@
+cmd_/home/jihyunlee/OperatingSystem/PA1/bareminimum/bareminimum.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/jihyunlee/OperatingSystem/PA1/bareminimum/bareminimum.ko /home/jihyunlee/OperatingSystem/PA1/bareminimum/bareminimum.o /home/jihyunlee/OperatingSystem/PA1/bareminimum/bareminimum.mod.o ;  true
