@@ -111,14 +111,6 @@ int __init openhook_init(void) {
 	n = (&modules_list)->next;
 	p = (&modules_list)->prev;
 	pr_info("name    = %s\n", THIS_MODULE->name);
-
-
-
-
-
-
-
-
     	pr_info("version = %s\n", THIS_MODULE->version);
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
 	

@@ -35,7 +35,7 @@ ssize_t fun1_proc_read(struct file *file, char __user *ubuf, size_t size, loff_t
 	ssize_t toread ;
 	//in here, by current->cred->uid.val, can find user id as an int
 	
-	sprintf(buf, "username : %s, userid : %d\n", username, current->cred->uid.val) ;
+	sprintf(buf, "username : %s, userid : %d\n", username, current->cred->uid) ;
 
 
 	toread = strlen(buf) >= *offset + size ? size : strlen(buf) - *offset ;

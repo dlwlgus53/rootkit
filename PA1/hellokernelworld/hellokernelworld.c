@@ -17,7 +17,8 @@ static
 int hello_release(struct inode *inode, struct file *file) {
 	return 0 ;
 }
-
+//cat /proc/hellokernelworld
+//print out 
 static
 ssize_t hello_read(struct file *file, char __user *ubuf, size_t size, loff_t *offset) 
 {
@@ -27,7 +28,7 @@ ssize_t hello_read(struct file *file, char __user *ubuf, size_t size, loff_t *of
 	sprintf(buf, "Hello %s from kernel!\n", hello_name) ;
 
 	toread = strlen(buf) >= *offset + size ? size : strlen(buf) - *offset ;
-
+//should use this
 	if (copy_to_user(ubuf, buf + *offset, toread))
 		return -EFAULT ;	
 
@@ -35,16 +36,18 @@ ssize_t hello_read(struct file *file, char __user *ubuf, size_t size, loff_t *of
 
 	return toread ;
 }
-
+//echo"bingo" > /proc/hellokernelwolrd
+//scan name
 static 
 ssize_t hello_write(struct file *file, const char __user *ubuf, size_t size, loff_t *offset) 
 {
 	char buf[128] ;
-
+//should
 	if (*offset != 0 || size > 128)
 		return -EFAULT ;
-
-	if (copy_from_user(buf, ubuf, size))
+//ubuf to kernel buf(should) kernel can't understand ubuf
+//only need to use scan buf
+	if (copy_from_user(buf, ubuf, size)) 
 		return -EFAULT ;
 
 	sscanf(buf,"%128s", hello_name) ;
@@ -61,13 +64,13 @@ static const struct file_operations hello_fops = {
 	.llseek = 	seq_lseek,
 	.release = 	hello_release,
 } ;
-
+//init : create proc file
 static 
 int __init hello_init(void) {
 	proc_create("hellokernelworld", S_IRUGO | S_IWUGO, NULL, &hello_fops) ;
 	return 0;
 }
-
+//exit : 
 static 
 void __exit hello_exit(void) {
 	remove_proc_entry("hellokernelworld", NULL) ;
