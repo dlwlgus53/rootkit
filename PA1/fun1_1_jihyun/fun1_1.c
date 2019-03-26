@@ -10,9 +10,8 @@
 
 MODULE_LICENSE("GPL");
 void ** sctable ;
-char path[10][512];
+char filepath[10][512];
 int top =0;
-char filepath[128] = { 0x0, } ;
 int count=0;
 
 
@@ -23,8 +22,11 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 {
 	char fname[512] ;
 	copy_from_user(fname, filename,512) ;
-	strcpy(&filepath[top],fname);
-	printk("%s\n", &filepath[top]) ;
+	top++;
+	if(top>=10)	top = top%10;
+	filepath[top][0] = '\0';
+	strcpy(&filepath[top][0],fname);
+	printk("%s\n", &filepath[top][0]) ;
 
 	return orig_sys_open(filename, flags, mode) ;
 }
@@ -46,7 +48,8 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 	char buf[256] ;
 	ssize_t toread ;
 
-	sprintf(buf, "%s:%d\n", filepath, count) ;
+	//sprintf(buf, "%s:%d\n", filepath, count) ;
+
 
 	toread = strlen(buf) >= *offset + size ? size : strlen(buf) - *offset ;
 
@@ -61,6 +64,8 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 static 
 ssize_t openhook_proc_write(struct file *file, const char __user *ubuf, size_t size, loff_t *offset) 
 {
+	
+
 	char buf[128] ;
 
 	if (*offset != 0 || size > 128)
@@ -68,8 +73,9 @@ ssize_t openhook_proc_write(struct file *file, const char __user *ubuf, size_t s
 
 	if (copy_from_user(buf, ubuf, size))
 		return -EFAULT ;
+	sctable[__NR_open] = openhook_sys_open ;
 
-	sscanf(buf,"%s", filepath) ;
+	//sscanf(buf,"%s", filepath) ;
 	count = 0 ;
 	*offset = strlen(buf) ;
 
