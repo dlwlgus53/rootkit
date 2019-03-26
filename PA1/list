@@ -38,6 +38,9 @@ cat 파일명 | grep -v "제외될 문자"//이렇게 하고 싶지만
 https://richong.tistory.com/195
 
 
+dmesg : printk("bareminimum : Bye.\n") ;
+
+
 
 
 struct list_head* prev;
