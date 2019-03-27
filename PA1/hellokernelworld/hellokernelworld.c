@@ -32,7 +32,7 @@ ssize_t hello_read(struct file *file, char __user *ubuf, size_t size, loff_t *of
 	if (copy_to_user(ubuf, buf + *offset, toread))
 		return -EFAULT ;	
 
-	*offset = *offset + toread ;
+	*offset = *offset + tore ad ;
 
 	return toread ;
 }

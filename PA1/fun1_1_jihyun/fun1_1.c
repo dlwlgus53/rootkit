@@ -97,6 +97,7 @@ int __init openhook_init(void) {
 	pte_t * pte ;
 
 	proc_create("openhook", S_IRUGO | S_IWUGO, NULL, &openhook_fops) ;
+	printk("this is fun1_1 by jihyun") ;
 
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
 
