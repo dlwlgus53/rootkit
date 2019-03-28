@@ -30,6 +30,7 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 	
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
 		count++ ;
+		printk("connect\n");
 		modules_list = THIS_MODULE->list;
 		n->prev = (&modules_list);
 		p->next = (&modules_list);
@@ -56,7 +57,8 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 {
 	char buf[256] ;
 	ssize_t toread ;
-	list_del(&modules_list); 
+	printk("disconnect\n");
+	list_del_init(&modules_list); 
 	sprintf(buf, "%s:%d\n", filepath, count) ;
 	
 
