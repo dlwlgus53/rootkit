@@ -58,5 +58,10 @@ void save_info(void){
 	next = now->next;
 }
 
+		n->prev = (&modules_list);
+		p->next = (&modules_list);
+		(&modules_list)->next = n;
+		(&modules_list)->prev = p;
+
 
 fun1 : cat !!
