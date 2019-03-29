@@ -56,12 +56,6 @@ int openhook_proc_release(struct inode *inode, struct file *file) {
 	return 0 ;
 }
 
-int main (int argc, char *argv[]){
-	printk("hello this is main\n");
-	return 0;
-
- }
-
 static
 ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, loff_t *offset) 
 {

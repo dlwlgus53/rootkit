@@ -41,6 +41,8 @@ https://richong.tistory.com/195
 dmesg : printk("bareminimum : Bye.\n") ;
 
 
+gcc hello.c -o hello.out
+
 
 
 struct list_head* prev;
@@ -68,5 +70,7 @@ fun1 : cat !!
 
 
 https://stackoverflow.com/questions/46021875/basic-cli-program-in-c
+
+ sudo apt-get update && sudo apt-get install build-essential
 
 
