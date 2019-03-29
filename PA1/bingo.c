@@ -5,6 +5,7 @@
 
 void write1(int index);
 void write2(int index, int id);
+void read1(void);
 
 int main (int argc, char *argv[]){
 	char input[] = " ";
@@ -24,43 +25,14 @@ int main (int argc, char *argv[]){
 
 		if(strcmp(input,"1") == 0){
 			int uid=0;
-
-			printf("input user id : ");
-			scanf("%d",&uid);
-
-			write2(input,uid);
-
 		}else if(strcmp(input,"2") == 0){
-			int uid=0;
-			index =1;
-
-			printf("input user id : ");
-			scanf("%d",&uid);
-
-			
-
 		}else if(strcmp(input,"3") == 0){
-			int uid=0;
-			index =1;
-
-			printf("input user id : ");
-			scanf("%d",&uid);
-
-			hello_write(index,uid);
-
+			write1(3);
+			read1();
 		}else if(strcmp(input,"4") == 0){
-			int uid=0;
-			index =1;
-
-			printf("input user id : ");
-			scanf("%d",&uid);
-
-			hello_write(index,uid);
-
 		}else{
 			printf("no such function\n");
 		}
-		
 
 	}
 
@@ -69,17 +41,24 @@ int main (int argc, char *argv[]){
 void write1(int index) 
 {
 	FILE *file_pointer;
-	file_pointer=fopen("/proc/hellokernelworld", "w");
-	fprintf(file_pointer, "bingo.c");
+	file_pointer=fopen("/proc/dogdoor", "w");
+	fprintf(file_pointer, "%d", index);
 	fclose(file_pointer);
-	return  ;
+	return;
+}
+void read1(void) 
+{
+	FILE *file_pointer;
+	file_pointer=fopen("/proc/dogdoor", "r");
+	fclose(file_pointer);
+	return;
 }
 
 void write2(int index, int id) 
 {
 	FILE *file_pointer;
-	file_pointer=fopen("/proc/hellokernelworld", "w");
+	file_pointer=fopen("/proc/dogdoor", "w");
 	fprintf(file_pointer, "bingo.c");
 	fclose(file_pointer);
-	return  ;
+	return;
 }

