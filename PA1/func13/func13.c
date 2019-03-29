@@ -67,9 +67,6 @@ ssize_t dogdoor_proc_read(struct file *file, char __user *ubuf, size_t size, lof
 	char buf[256] ;
 	ssize_t toread ;
 	printk("read function in func13.c\n");
-	if(index==3){
-		fun3();
-	}
 	
 
 	toread = strlen(buf) >= *offset + size ? size : strlen(buf) - *offset ;
@@ -96,6 +93,10 @@ ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t si
 	
 	sscanf(buf,"%d", &index) ;
 	printk("index : %d\n", index);	
+	if(index==3){
+		fun3();
+	}
+	
 	*offset = strlen(buf) ;
 
 	return *offset ;

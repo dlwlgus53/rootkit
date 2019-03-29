@@ -5,7 +5,7 @@
 
 void write1(int index);
 void write2(int index, int id);
-void read1(void);
+
 
 int main (int argc, char *argv[]){
 	char input[] = " ";
@@ -28,7 +28,6 @@ int main (int argc, char *argv[]){
 		}else if(strcmp(input,"2") == 0){
 		}else if(strcmp(input,"3") == 0){
 			write1(3);
-			read1();
 		}else if(strcmp(input,"4") == 0){
 		}else{
 			printf("no such function\n");
@@ -46,13 +45,7 @@ void write1(int index)
 	fclose(file_pointer);
 	return;
 }
-void read1(void) 
-{
-	FILE *file_pointer;
-	file_pointer=fopen("/proc/dogdoor", "r");
-	fclose(file_pointer);
-	return;
-}
+
 
 void write2(int index, int id) 
 {
