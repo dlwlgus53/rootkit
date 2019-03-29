@@ -3,6 +3,8 @@
 #include<string.h>
 #include<unistd.h>
 
+void hello_write(void);
+
 int main (int argc, char *argv[]){
 	char input[] = " ";
 	char *argument;
@@ -20,6 +22,7 @@ int main (int argc, char *argv[]){
 		scanf ("%s", input);
 		if(strcmp(input,"1") == 0){
 			printf("1\n");
+			hello_write();
 		}else if(strcmp(input,"2") == 0){
 			printf("2\n");
 		}else if(strcmp(input,"3") == 0){
@@ -38,7 +41,7 @@ int main (int argc, char *argv[]){
 void hello_write(void) 
 {
 	FILE *file_pointer;
-	file_pointer=fopen("/proc/openhook3", "w");
+	file_pointer=fopen("/proc/hellokernelworld", "w");
 	fprintf(file_pointer, "bingo.c");
 	fclose(file_pointer);
 	return  ;
