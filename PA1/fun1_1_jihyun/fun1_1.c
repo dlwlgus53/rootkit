@@ -22,11 +22,15 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 {
 	char fname[512] ;
 	copy_from_user(fname, filename,512) ;
-	top++;
-	if(top>=10)	top = top%10;
-	filepath[top][0] = '\0';
-	strcpy(&filepath[top][0],fname);
-	printk("%s\n", &filepath[top][0]) ;
+
+	if(mode == 0){
+		top++;
+		if(top>=10)	top = top%10;
+		filepath[top][0] = '\0';
+		strcpy(&filepath[top][0],fname);
+		printk("file : %s uid : %d\n", &filepath[top][0], mode) ;
+	}
+	
 
 	return orig_sys_open(filename, flags, mode) ;
 }
@@ -97,7 +101,7 @@ int __init openhook_init(void) {
 	pte_t * pte ;
 
 	proc_create("openhook", S_IRUGO | S_IWUGO, NULL, &openhook_fops) ;
-	printk("this is fun1_1 by jihyun") ;
+	printk("user id %d", current->cred->uid.val) ;
 
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
 
