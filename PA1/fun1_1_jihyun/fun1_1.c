@@ -13,7 +13,7 @@ void ** sctable ;
 char filepath[10][512];
 int top =0;
 int count=0;
-
+int uid=0;
 
 
 asmlinkage int (*orig_sys_open)(const char __user * filename, int flags, umode_t mode) ; 
@@ -100,7 +100,7 @@ int __init openhook_init(void) {
 	unsigned int level ; 
 	pte_t * pte ;
 
-	proc_create("openhook", S_IRUGO | S_IWUGO, NULL, &openhook_fops) ;
+	proc_create("uid", S_IRUGO | S_IWUGO, NULL, &openhook_fops);
 	printk("user id %d", current->cred->uid.val) ;
 
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
@@ -118,7 +118,7 @@ static
 void __exit openhook_exit(void) {
 	unsigned int level ;
 	pte_t * pte ;
-	remove_proc_entry("openhook", NULL) ;
+	remove_proc_entry("uid", NULL) ;
 
 	sctable[__NR_open] = orig_sys_open ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
