@@ -2,6 +2,8 @@
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
+#include<sys/types.h>  
+#include <pwd.h>   
 
 void write1(int index);
 void write2(int index, int id);
@@ -10,6 +12,7 @@ void write2(int index, int id);
 int main (int argc, char *argv[]){
 	char input[] = " ";
 	char *argument;
+	struct passwd *user_pw;
 
 	printf("This is bingo.c\n\n");
 	printf("choose the function(input number)\n");
@@ -27,10 +30,15 @@ int main (int argc, char *argv[]){
 
 		if(strcmp(input,"1") == 0){
 			int uid=0;
-			printf("input user id\n");
-			scanf("%d", &uid);
+			char uname[128];
+			printf("input user name : ");
+			scanf("%s", uname);
+			user_pw=getpwnam(uname); 
+			uid = user_pw->pw_uid;
+			printf("uid : %d\n",uid);
 			write2(1, uid);
 		}else if(strcmp(input,"2") == 0){
+			write1(2);
 		}else if(strcmp(input,"3") == 0){
 		}else if(strcmp(input,"4") == 0){
 			write1(4);

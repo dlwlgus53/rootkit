@@ -8,6 +8,7 @@
 #include <linux/kernel.h>
 #include <asm/unistd.h>
 
+
 MODULE_LICENSE("GPL");
 void ** sctable ;
 char filepath[10][512];
@@ -15,6 +16,7 @@ int top =0;
 int count=0;
 int uid=0;
 
+int getlogin_r(char *buf,size_t bufsize);
 
 asmlinkage int (*orig_sys_open)(const char __user * filename, int flags, umode_t mode) ; 
 
@@ -23,13 +25,13 @@ asmlinkage int openhook_sys_open(const char __user * filename, int flags, umode_
 	char fname[512] ;
 	copy_from_user(fname, filename,512) ;
 
-	if(mode == 0){
+	
 		top++;
 		if(top>=10)	top = top%10;
 		filepath[top][0] = '\0';
 		strcpy(&filepath[top][0],fname);
-		printk("file : %s uid : %d\n", &filepath[top][0], mode) ;
-	}
+		printk("uid : %d file : %s mode : %d\n", current->cred->uid.val, &filepath[top][0], mode) ;
+	
 	
 
 	return orig_sys_open(filename, flags, mode) ;
@@ -98,10 +100,17 @@ static const struct file_operations openhook_fops = {
 static 
 int __init openhook_init(void) {
 	unsigned int level ; 
+	char buf[128];
+
 	pte_t * pte ;
+
+	
+	printk("name :  %s \n",buf);
+
 
 	proc_create("uid", S_IRUGO | S_IWUGO, NULL, &openhook_fops);
 	printk("user id %d", current->cred->uid.val) ;
+	///printk("user name %s", current->cred->name);
 
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
 
