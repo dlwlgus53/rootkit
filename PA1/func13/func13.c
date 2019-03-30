@@ -93,15 +93,11 @@ void hide_module(void){
 	
 static
 void show_log(void) 
-{
-	char buf[256] ;
-	ssize_t toread ;
-	int i=0;
+{	int i=0;
 	for(i=0; i<10; i++){
-		printk(buf, "path : %s\n", &filepath[i][0]) ;
+		printk("path : %s\n", &filepath[i][0]) ;
 	}
 
-	
 }
 
 
