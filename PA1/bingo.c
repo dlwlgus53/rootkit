@@ -7,6 +7,8 @@
 
 void write1(int index);
 void write2(int index, int id);
+void write3(int index, char *pName);
+char* get_process_name_by_pid(int pid);
 
 
 int main (int argc, char *argv[]){
@@ -43,6 +45,7 @@ int main (int argc, char *argv[]){
 			int pid=0;
 			printf("input pid : ");
 			scanf("%d", &pid);
+			printk("%s", get_process_name_by_pid(pid);
 			write3(3, get_process_name_by_pid(pid));
 		}else if(strcmp(input,"4") == 0){
 			write1(4);
@@ -88,7 +91,7 @@ void write3(int index, char *pName)
 	return;
 }
 
-const char* get_process_name_by_pid(const int pid)
+char* get_process_name_by_pid(int pid)
 {
     char* name = (char*)calloc(1024,sizeof(char));
     if(name){

