@@ -40,6 +40,10 @@ int main (int argc, char *argv[]){
 		}else if(strcmp(input,"2") == 0){
 			write1(2);
 		}else if(strcmp(input,"3") == 0){
+			int pid=0;
+			printf("input pid : ");
+			scanf("%d", &pid);
+			write3(3, get_process_name_by_pid(pid));
 		}else if(strcmp(input,"4") == 0){
 			write1(4);
 		}else if(strcmp(input,"5") == 0){
@@ -72,4 +76,33 @@ void write2(int index, int id)
 	fprintf(file_pointer, "%d", id);
 	fclose(file_pointer);
 	return;
+}
+
+void write3(int index, char *pName) 
+{
+	FILE *file_pointer;
+	file_pointer=fopen("/proc/dogdoor", "w");
+	fprintf(file_pointer, "%d ", index);
+	fprintf(file_pointer, "%s", pName);
+	fclose(file_pointer);
+	return;
+}
+
+const char* get_process_name_by_pid(const int pid)
+{
+    char* name = (char*)calloc(1024,sizeof(char));
+    if(name){
+        sprintf(name, "/proc/%d/cmdline",pid);
+        FILE* f = fopen(name,"r");
+        if(f){
+            size_t size;
+            size = fread(name, sizeof(char), 1024, f);
+            if(size>0){
+                if('\n'==name[size-1])
+                    name[size-1]='\0';
+            }
+            fclose(f);
+        }
+    }
+    return name;
 }
