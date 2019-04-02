@@ -44,8 +44,7 @@ asmlinkage int dogdoor_sys_open(const char __user * filename, int flags, umode_t
 
 asmlinkage int dogdoor_sys_kill(pid_t pid, int sig)
 {	
-	printk("input process name : %d", inpid); 
-	printk("dogdoor sys close implemented");
+	
 	//copy from kernel to user
 	//copy_from_user(pID, proID, 256);
 
